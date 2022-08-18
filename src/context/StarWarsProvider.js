@@ -9,6 +9,11 @@ class StarWarsProvider extends Component {
       planets: [],
       filterByName: '',
       filteredPlanets: [],
+      valueFilter: 0,
+      colunaFiltro: 'population',
+      comparaFiltro: 'maior que',
+      newPlanets: [],
+      foiClicado: false,
     };
   }
 
@@ -32,6 +37,38 @@ escreve = (event) => {
   this.setState({ [event.target.name]: event.target.value }, () => this.filterPlanet());
 }
 
+clicaBotao = () => {
+  const { planets, valueFilter, colunaFiltro, comparaFiltro } = this.state;
+  const maiorQue = planets.filter((planet) => (
+    Number(planet[colunaFiltro]) > Number(valueFilter)));
+  const menorQue = planets.filter((planet) => (
+    Number(planet[colunaFiltro]) < Number(valueFilter)));
+  const igualA = planets.filter((planet) => (
+    Number(planet[colunaFiltro]) === Number(valueFilter)));
+  switch (comparaFiltro) {
+  case 'maior que':
+    this.setState({
+      newPlanets: maiorQue,
+    });
+    break;
+  case 'menor que':
+    this.setState({
+      newPlanets: menorQue,
+    });
+    break;
+  case 'igual a':
+    this.setState({
+      newPlanets: igualA,
+    });
+    break;
+  default:
+    break;
+  }
+  this.setState({
+    foiClicado: true,
+  });
+}
+
 render() {
   const { Provider } = StarWarsContext;
   const { children } = this.props;
@@ -42,6 +79,7 @@ render() {
         requestPlanets: this.requestPlanets,
         filterPlanet: this.filterPlanet,
         escreve: this.escreve,
+        clicaBotao: this.clicaBotao,
       } }
     >
       {children}
