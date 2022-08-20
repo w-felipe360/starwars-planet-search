@@ -14,6 +14,14 @@ class StarWarsProvider extends Component {
       comparaFiltro: 'maior que',
       newPlanets: [],
       foiClicado: false,
+      filtrosAnteriores: [],
+      clicouVezes: -1,
+      options: [
+        'population',
+        'orbital_period',
+        'diameter',
+        'rotation_period',
+        'surface_water'],
     };
   }
 
@@ -33,12 +41,34 @@ filterPlanet = () => {
   });
 }
 
+deleteOption = async () => {
+  const { options, colunaFiltro } = this.state;
+  const newFilters = await options.filter((filtro) => filtro !== colunaFiltro);
+  this.setState({ options: newFilters }, () => this.setState({
+    colunaFiltro: newFilters[0],
+  }));
+}
+
 escreve = (event) => {
   this.setState({ [event.target.name]: event.target.value }, () => this.filterPlanet());
 }
 
+salvaValores = () => {
+  const { valueFilter, colunaFiltro, comparaFiltro,
+    newPlanets } = this.state;
+  this.setState((prevState) => ({
+    filtrosAnteriores: [...prevState.filtrosAnteriores, {
+      valueFilter,
+      colunaFiltro,
+      comparaFiltro,
+      newPlanets,
+    }],
+  }));
+}
+
 clicaBotao = () => {
   const { planets, valueFilter, colunaFiltro, comparaFiltro } = this.state;
+  this.setState((prevState) => ({ clicouVezes: prevState.clicouVezes + 1 }));
   const maiorQue = planets.filter((planet) => (
     Number(planet[colunaFiltro]) > Number(valueFilter)));
   const menorQue = planets.filter((planet) => (
@@ -67,6 +97,50 @@ clicaBotao = () => {
   this.setState({
     foiClicado: true,
   });
+  this.salvaValores();
+  this.deleteOption();
+}
+
+filtrouBotao = () => {
+  const { filtrosAnteriores, clicouVezes, colunaFiltro, comparaFiltro,
+    valueFilter } = this.state;
+  const arrayAnterior = filtrosAnteriores[clicouVezes];
+  const { newPlanets } = arrayAnterior;
+  const maiorQue = newPlanets.filter((planet) => (
+    Number(planet[colunaFiltro]) > Number(valueFilter)));
+  const menorQue = newPlanets.filter((planet) => (
+    Number(planet[colunaFiltro]) < Number(valueFilter)));
+  const igualA = newPlanets.filter((planet) => (
+    Number(planet[colunaFiltro]) === Number(valueFilter)));
+  switch (comparaFiltro) {
+  case 'maior que':
+    this.setState({
+      newPlanets: maiorQue,
+    }, () => this.salvaValores());
+    break;
+  case 'menor que':
+    this.setState({
+      newPlanets: menorQue,
+    }, () => this.salvaValores());
+    break;
+  case 'igual a':
+    this.setState({
+      newPlanets: igualA,
+    }, () => this.salvaValores());
+    break;
+  default:
+    break;
+  }
+  this.setState({
+    foiClicado: true,
+  });
+  this.deleteOption();
+}
+
+escreveAnterior = () => {
+  const { clicouVezes } = this.state;
+  if (clicouVezes > 0) { return this.filtrouBotao(); }
+  return this.clicaBotao();
 }
 
 render() {
@@ -80,6 +154,7 @@ render() {
         filterPlanet: this.filterPlanet,
         escreve: this.escreve,
         clicaBotao: this.clicaBotao,
+        escreveAnterior: this.escreveAnterior,
       } }
     >
       {children}

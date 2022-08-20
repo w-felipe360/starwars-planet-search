@@ -4,13 +4,14 @@ import StarWarsContext from '../context/StarWarsContext';
 export default function Table() {
   const { requestPlanets, planets, escreve,
     filterByName, filteredPlanets, valueFilter,
-    clicaBotao, newPlanets, foiClicado } = useContext(StarWarsContext);
+    newPlanets, foiClicado, escreveAnterior, options,
+    filtrosAnteriores } = useContext(StarWarsContext);
   useEffect(() => {
     requestPlanets();
   }, [requestPlanets]);
   const mapeiaArray = (param) => (param.map((planet) => (
     <tr key={ planet.name }>
-      <td>{planet.name}</td>
+      <td data-testid="planet-name">{planet.name}</td>
       <td>{planet.rotation_period}</td>
       <td>{planet.orbital_period}</td>
       <td>{planet.diameter}</td>
@@ -18,7 +19,7 @@ export default function Table() {
       <td>{planet.gravity}</td>
       <td>{planet.terrain}</td>
       <td>{planet.surface_water}</td>
-      <td>{ planet.population }</td>
+      <td>{planet.population }</td>
       <td>{planet.films}</td>
       <td>{planet.created}</td>
       <td>{planet.edited}</td>
@@ -49,11 +50,9 @@ export default function Table() {
         name="colunaFiltro"
         onChange={ escreve }
       >
-        <option>population</option>
-        <option>orbital_period</option>
-        <option>diameter</option>
-        <option>rotation_period</option>
-        <option>surface_water</option>
+        {options.map((option) => (
+          <option key={ option }>{option}</option>
+        ))}
       </select>
       <select
         data-testid="comparison-filter"
@@ -75,11 +74,23 @@ export default function Table() {
         type="button"
         data-testid="button-filter"
         name="buttonFilter"
-        onClick={ clicaBotao }
+        onClick={ escreveAnterior }
       >
         Filtrar
 
       </button>
+      <div>
+        { filtrosAnteriores.map((result, index) => (
+
+          <p key={ index }>
+            {
+              `${result.colunaFiltro} ${result.comparaFiltro} ${result.valueFilter}`
+            }
+          </p>
+
+        )) }
+
+      </div>
       <table>
         <tr>
           <th>name</th>
@@ -95,7 +106,6 @@ export default function Table() {
           <th>created</th>
           <th>edited</th>
           <th>URL</th>
-
         </tr>
         {
           criaTabela()
